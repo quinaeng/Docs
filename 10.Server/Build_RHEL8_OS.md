@@ -25,8 +25,8 @@ hostnamectl set-hostname sv01<br>
 <br>
 - ネットワークの設定<br>
 nmcli connection modify <ifname> ipv4.addresses <ip/sm> \<br>
-ipv4.dns <DNS#1>,<DNS#2> \<br>
-ipv4.gateway <ip> \<br>
+ipv4.dns DNS#1,DNS#2 \<br>
+ipv4.gateway gateway \<br>
 ipv6.method disabled \<br>
 connection.autoconnect yes<br>
 <br>
@@ -113,7 +113,8 @@ sysctl -p<br>
 #udp6       tpi_clts      v     inet6    udp     -       -
 #tcp6       tpi_cots_ord  v     inet6    tcp     -       -
 ```
-- vi /etc/hosts<br>
+<br>
+- vi /etc/hosts
 
 ```
 #::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
