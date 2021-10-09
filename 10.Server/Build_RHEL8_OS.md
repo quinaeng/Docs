@@ -1,4 +1,4 @@
-#  Update Build_RHEL8_OS
+#  Build_RHEL8_OS
 ---
 <br>
 - サービス自動起動の設定<br>
