@@ -1,4 +1,4 @@
-# Linuxサーバ構築(RedHat Linux Enterprise 8.x)
+#  Update Build_RHEL8_OS
 ---
 <br>
 - サービス自動起動の設定<br>
