@@ -86,7 +86,7 @@ net.ipv4.tcp_fin_timeout = 30
 
 #Syn Flood攻撃対策
 net.ipv4.tcp_syncookies = 1
-<br>
+
 #IPv6無効化
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
@@ -108,13 +108,15 @@ net.ipv4.conf.all.secure_redirects = 0
 sysctl -p<br>
 <br>
 - IPv6無効化(コメントアウト)<br>
-
+cp -ip /etc/netconfig /etc/netconfig.org<br>
+vi /etc/netconfig<br>
+ 
 ```
 #udp6       tpi_clts      v     inet6    udp     -       -
 #tcp6       tpi_cots_ord  v     inet6    tcp     -       -
 ```
 <br>
-- vi /etc/hosts
+vi /etc/hosts
 
 ```
 #::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
