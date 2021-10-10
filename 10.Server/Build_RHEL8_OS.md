@@ -149,7 +149,7 @@ RateLimitInterval=0s
 firewall-cmd --new-zone Secured_Zone --permanent<br>
 firewall-cmd --zone=Secured_Zone --add-port=222/tcp --permanent<br>
 firewall-cmd --reload<br>
-nmcli connection modify <ifname> connection.zone Secured_Zone<br>
+nmcli connection modify ifname connection.zone Secured_Zone<br>
 <br>
 - 設定の確認<br> 
 firewall-cmd --list-all --zone=Secured_Zone<br>
