@@ -9,7 +9,10 @@ systemctl start rsyslog && systemctl enable rsyslog<br>
 systemctl start snmpd && systemctl enable snmpd<br>
 <br>
 - sshログイン用ユーザ作成<br>
-useradd sshuser -p password<br> 
+useradd sshuser -p password<br>
+<br>
+- 管理者用ユーザ作成<br>
+useradd admin -p password -G wheel<br>
 <br>
 - Tunedの設定(仮想サーバ)<br> 
 tuned-adm profile virtual-guest balanced<br>
@@ -62,17 +65,24 @@ SELINUX=disabled
 - suコマンドをwheelグループに所属しているユーザのみに利用制限(suコマンドの禁止)<br>
 cp -ip /etc/pam.d/su /etc/pam.d/su.org <br>
 vi /etc/pam.d/su<br>
- 
+
 ```<br>
 auth            required        pam_wheel.so use_uid
 ```
 <br>
+- sudoコマンドをwheelグループに所属しているユーザのミニ利用制限(sudoコマンドの禁止)
+visudo<br>
+
+```
+%wheel  ALL=(ALL)       ALL
+```
+<br> 
 - カーネルパラメータの設定<br>
 cp -ip /etc/sysctl.conf /etc/sysctl.conf.org<br>
 vi /etc/sysctl.conf<br>
 
-```<br>
-#TCP制御<br>
+```
+#TCP制御
 net.core.rmem_default = 253952
 net.core.wmem_default = 253952
 net.core.rmem_max = 16777216
@@ -110,17 +120,18 @@ sysctl -p<br>
 - IPv6無効化(コメントアウト)<br>
 cp -ip /etc/netconfig /etc/netconfig.org<br>
 vi /etc/netconfig<br>
- 
+
 ```
 #udp6       tpi_clts      v     inet6    udp     -       -
 #tcp6       tpi_cots_ord  v     inet6    tcp     -       -
 ```
 <br>
-vi /etc/hosts
+vi /etc/hosts<br>
 
 ```
 #::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 ```
+<br>
 cp -ip /etc/default/grub /etc/default/grub.org<br>
 vi /etc/default/grub<br>
 
@@ -129,7 +140,13 @@ GRUB_CMDLINE_LINUX="ipv6.disable=1"
 ```
 ※デフォルトの設定に「ipv6.disable=1」を追加する<br>
 <br>
-- ホスト名での通信を無効化<br>
+-ログイン失敗を5回繰り返すと15分間アカウントをロックする<br>
+vi /etc/pam.d/password-auth<br>
+
+```
+auth        required      pam_faillock.so preauth silent audit deny=5 unlock_time=600
+```
+-ホスト名での通信を無効化<br>
 vi /etc/nsswitch.conf<br>
 
 ```
@@ -162,4 +179,3 @@ systemctl disable kdump<br>
 - OS再起動<br> 
 reboot<br>
  
-
