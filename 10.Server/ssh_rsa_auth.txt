@@ -24,7 +24,7 @@ The key's randomart image is:
 # chmod 700 ~/.ssh
 # ssh-copy-id -i ~/.ssh/id_rsa.pub user@192.168.10.22
 
-■踏み台サーバでの作業
+■サーバでの作業
 # chmod 700 ~/.ssh
 # chmod 600 ~/.ssh/authorized_keys
 # vi /etc/ssh/sshd_config
