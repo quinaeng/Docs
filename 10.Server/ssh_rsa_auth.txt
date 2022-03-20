@@ -1,4 +1,6 @@
-■踏み台サーバでの作業
+- 踏み台サーバでの作業
+
+```
 # ssh-keygen -t rsa -b 4096
 Enter file in which to save the key (/root/.ssh/id_rsa):
 Created directory '/root/.ssh'.
@@ -20,11 +22,16 @@ The key's randomart image is:
 |  .o=.=B*  E o oo|
 | ..o.o++oo. ..oo=|
 +----[SHA256]-----+
+```
 
+```
 # chmod 700 ~/.ssh
 # ssh-copy-id -i ~/.ssh/id_rsa.pub user@192.168.10.22
+```
 
-■サーバでの作業
+- サーバでの作業
+
+```
 # chmod 700 ~/.ssh
 # chmod 600 ~/.ssh/authorized_keys
 # vi /etc/ssh/sshd_config
@@ -33,4 +40,4 @@ PasswordAuthentication no
 ==============================
 # systemctl restart sshd
 # systemctl status sshd
-
+```
