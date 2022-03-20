@@ -1,44 +1,89 @@
 #  Build_RHEL8_OS
----
-<br>
-- サービス自動起動の設定<br>
-dnf install -y rsyslog net-snmp sos bind-utils<br>
-<br>
-- サービス自動起動の設定<br>
-systemctl start rsyslog && systemctl enable rsyslog<br>
-systemctl start snmpd && systemctl enable snmpd<br>
-<br>
-- sshログイン用ユーザ作成<br>
-useradd sshuser -p password<br>
-<br>
-- 管理者用ユーザ作成<br>
-useradd admin -p password -G wheel<br>
-<br>
-- Tunedの設定(仮想サーバ)<br> 
-tuned-adm profile virtual-guest balanced<br>
-<br>
-- Tunedの設定(物理サーバ)<br>
-tuned-adm profile balanced<br>
-<br>
-- マルチユーザモード(CUI)でOSを起動<br>
-systemctl set-default multi-user.target<br>
-<br>
-- ホスト名の設定<br>
-hostnamectl set-hostname sv01<br> 
-<br>
-- ネットワークの設定<br>
-nmcli connection modify <ifname> ipv4.addresses <ip/sm> \<br>
-ipv4.dns DNS#1,DNS#2 \<br>
-ipv4.gateway gateway \<br>
-ipv6.method disabled \<br>
-connection.autoconnect yes<br>
-<br>
-- 「ctrl + alt + delete」のリブート防止設定<br>
-systemctl mask ctrl-alt-del.target<br>
-<br>
-- sshの設定<br> 
-cp -ip /etc/ssh/sshd_config /etc/ssh/sshd_config.org<br>
-vi /etc/ssh/sshd_config<br>
+
+- OSのアップデート
+
+```
+dnf update -y
+```
+
+- タイムゾーンの設定
+
+```
+sudo timedatectl set-timezone Asia/Tokyo
+```
+
+- サービス自動起動の設定
+
+```
+dnf install -y rsyslog net-snmp sos bind-utils
+```
+
+- サービス自動起動の設定
+
+```
+systemctl enable --now rsyslog
+systemctl enable --now snmpd
+```
+
+- sshログイン用ユーザ作成
+
+```
+useradd sshuser -p password
+```
+
+
+- 管理者用ユーザ作成
+
+```
+useradd admin -p password -G wheel
+```
+
+- Tunedの設定(仮想サーバ) 
+
+```
+tuned-adm profile virtual-guest balanced
+```
+
+- Tunedの設定(物理サーバ)
+
+```
+tuned-adm profile balanced
+```
+
+- マルチユーザモード(CUI)でOSを起動
+
+```
+set-default multi-user.target
+```
+
+- ホスト名の設定
+
+```
+hostnamectl set-hostname sv01
+```
+
+- ネットワークの設定
+
+```
+nmcli connection modify <ifname> ipv4.addresses <ip/sm> \
+ipv4.dns DNS#1,DNS#2 \
+ipv4.gateway gateway \
+ipv6.method disabled \
+connection.autoconnect yes
+```
+
+- 「ctrl + alt + delete」のリブート防止設定
+
+```
+systemctl mask ctrl-alt-del.target
+```
+
+- sshの設定
+
+```
+cp -ip /etc/ssh/sshd_config /etc/ssh/sshd_config.org
+vi /etc/ssh/sshd_config
+```
 
 ```
 Port 222
@@ -53,33 +98,45 @@ PermitEmptyPasswords no
 Protocol 2
 UseDNS no
 ```
-<br>
-- SELINUXの無効化<br>
-cp -ip /etc/selinux/config /etc/selinux/config.org<br>
-vi /etc/selinux/config<br>
+
+- SELINUXの無効化
+
+```
+cp -ip /etc/selinux/config /etc/selinux/config.org
+vi /etc/selinux/config
+```
 
 ```
 SELINUX=disabled
 ```
-<br>
-- suコマンドをwheelグループに所属しているユーザのみに利用制限(suコマンドの禁止)<br>
-cp -ip /etc/pam.d/su /etc/pam.d/su.org <br>
-vi /etc/pam.d/su<br>
 
-```<br>
+- suコマンドをwheelグループに所属しているユーザのみに利用制限(suコマンドの禁止)
+
+```
+cp -ip /etc/pam.d/su /etc/pam.d/su.org 
+vi /etc/pam.d/su
+```
+
+```
 auth            required        pam_wheel.so use_uid
 ```
-<br>
+
 - sudoコマンドをwheelグループに所属しているユーザのミニ利用制限(sudoコマンドの禁止)
-visudo<br>
+
+```
+visudo
+```
 
 ```
 %wheel  ALL=(ALL)       ALL
 ```
-<br> 
-- カーネルパラメータの設定<br>
-cp -ip /etc/sysctl.conf /etc/sysctl.conf.org<br>
-vi /etc/sysctl.conf<br>
+
+- カーネルパラメータの設定
+
+```
+cp -ip /etc/sysctl.conf /etc/sysctl.conf.org
+vi /etc/sysctl.conf
+```
 
 ```
 #TCP制御
@@ -113,69 +170,103 @@ net.ipv4.conf.all.accept_redirects = 0
 net.ipv6.conf.all.accept_redirects = 0
 net.ipv4.conf.all.secure_redirects = 0
 ```
-<br>
-- カーネルパラメータの設定反映<br>
-sysctl -p<br>
-<br>
-- IPv6無効化(コメントアウト)<br>
-cp -ip /etc/netconfig /etc/netconfig.org<br>
-vi /etc/netconfig<br>
+
+- カーネルパラメータの設定反映
+
+```
+sysctl -p
+```
+
+- IPv6無効化(コメントアウト)
+
+```
+cp -ip /etc/netconfig /etc/netconfig.org
+vi /etc/netconfig
+```
 
 ```
 #udp6       tpi_clts      v     inet6    udp     -       -
 #tcp6       tpi_cots_ord  v     inet6    tcp     -       -
 ```
-<br>
-vi /etc/hosts<br>
+
+```
+vi /etc/hosts
+```
 
 ```
 #::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
 ```
-<br>
-cp -ip /etc/default/grub /etc/default/grub.org<br>
-vi /etc/default/grub<br>
+
+```
+cp -ip /etc/default/grub /etc/default/grub.org
+vi /etc/default/grub
+```
 
 ```
 GRUB_CMDLINE_LINUX="ipv6.disable=1"
 ```
-※デフォルトの設定に「ipv6.disable=1」を追加する<br>
-<br>
--ログイン失敗を5回繰り返すと15分間アカウントをロックする<br>
-vi /etc/pam.d/password-auth<br>
+
+※デフォルトの設定に「ipv6.disable=1」を追加する
+
+- ログイン失敗を5回繰り返すと15分間アカウントをロックする
+
+```
+vi /etc/pam.d/password-auth
+```
 
 ```
 auth        required      pam_faillock.so preauth silent audit deny=5 unlock_time=600
 ```
--ホスト名での通信を無効化<br>
-vi /etc/nsswitch.conf<br>
+
+- ホスト名での通信を無効化
+
+```
+vi /etc/nsswitch.conf
+```
 
 ```
 #hosts:      files dns myhostname
 hosts:      files dns
 ```
-<br>
-- Journalの設定<br>
-cp -ip /etc/systemd/journald.conf /etc/systemd/journald.conf.org<br>
-vi /etc/systemd/journald.conf<br>
+
+- Journalの設定
+
+```
+cp -ip /etc/systemd/journald.conf /etc/systemd/journald.conf.org
+vi /etc/systemd/journald.conf
+```
 
 ```
 Compress=yes
 RateLimitInterval=0s
 ```
-<br>
-- Firewalldの設定<br>
-- デフォルト設定の削除<br> 
-firewall-cmd --new-zone Secured_Zone --permanent<br>
-firewall-cmd --zone=Secured_Zone --add-port=222/tcp --permanent<br>
-firewall-cmd --reload<br>
-nmcli connection modify ifname connection.zone Secured_Zone<br>
-<br>
-- 設定の確認<br> 
-firewall-cmd --list-all --zone=Secured_Zone<br>
-<br>
-- 不要サービスの停止<br>
-systemctl disable kdump<br> 
-<br>
-- OS再起動<br> 
-reboot<br>
- 
+
+## Firewalldの設定
+
+
+- デフォルト設定の削除
+
+```
+firewall-cmd --new-zone Secured_Zone --permanent
+firewall-cmd --zone=Secured_Zone --add-port=222/tcp --permanent
+firewall-cmd --reload
+nmcli connection modify ifname connection.zone Secured_Zone
+```
+
+- 設定の確認
+
+```
+firewall-cmd --list-all --zone=Secured_Zone
+```
+
+- 不要サービスの停止
+
+```
+systemctl disable kdump
+```
+
+- OS再起動
+
+```
+reboot
+```
