@@ -162,5 +162,3 @@ COMMIT
 # systemctl restart iptables
 ```
 
-
-
