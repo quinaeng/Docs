@@ -14,6 +14,61 @@ $?: 直前に実行されたコマンドの終了ステータス
 $$: スクリプトのプロセスID
 ```
 
+・動作確認のためのスクリプト
+
+```
+#!/bin/bash
+
+echo "$0"
+echo "$1"
+echo "$2"
+echo "$3"
+echo "$#"
+echo "$@"
+echo "$*"
+echo "$?"
+echo "$$"
+```
+
+```
+[(￣∀￣)V]# bash test.sh param1 param2 param3
+test.sh
+param1
+param2
+param3
+3
+param1 param2 param3
+param1 param2 param3
+0
+7266
+```
+
+・$@と$\*の違いは$@は、引数を各引数として展開され$\*は一つの引数として展開される。
+
+```
+#!/bin/bash
+
+echo "Using \$*"
+for arg in "$*"; do
+    echo $arg
+done
+
+echo "Using \$@"
+for arg in "$@"; do
+    echo $arg
+done
+```
+
+```
+[(￣∀￣)V]# bash test.sh param1 param2 param3
+Using $*
+param1 param2 param3
+Using $@
+param1
+param2
+param3
+```
+
 ### 配列
 
 ### リダイレクト
@@ -127,17 +182,17 @@ done
 
 ## Command
 
-・shift
+### shift
 
-・basename
+### basename
 
-・dirname
+### dirname
 
-・awk
+### awk
 
-・sed
+### sed
 
-・sort
+### sort
 
 ### grep
 
@@ -145,13 +200,14 @@ done
 # sample.txtの中で、catコマンドの出力に含まれる文字列を表示
 grep -f <(cat pattern.txt) sample.txt
 ```
-・cut
 
-・uniq
+### cut
 
-・tr
+### uniq
 
-・cat
+### tr
+
+### cat
 
 ```
 cat << EOF > ./tet.txt
@@ -159,25 +215,32 @@ cat << EOF > ./tet.txt
 EOF
 ```
 
-・rename
+### rename
 
-・getopt
+### getopt
 
-・eval
+### eval
 
-・type
+### type
 
-・trap
-・wait
-・printf
-・tar
-・zip
-・set
-・unset
+### trap
+
+### wait
+
+### printf
+
+### tar
+
+### zip
+
+### set
+
+### unset
 
 ### メモ
 
 ・実現したい機能
+
 ```
 ファイルの世代管理
 シェルスクリプトでオプション機能を付けたい
