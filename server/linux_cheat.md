@@ -73,6 +73,53 @@ param3
 
 ### リダイレクト
 
+・標準出力をファイルに出力する
+```
+[(￣∀￣)V]# ls 1> output.txt
+
+/tmp/work
+[(￣∀￣)V]# cat output.txt
+output.txt
+```
+
+・標準エラー出力をファイルに出力する(存在しないコマンドを実行)
+
+```
+[(￣∀￣)V]# lll 2> output.txt
+
+/tmp/work
+[(￣∀￣)V]# cat output.txt
+コマンド 'lll' が見つかりません。もしかして:
+  command 'lli' from deb llvm-runtime (1:14.0-55~exp2)
+  command 'llc' from deb llvm (1:14.0-55~exp2)
+  command 'llt' from deb storebackup (3.2.1-2)
+  command 'lld' from deb lld (1:14.0-55~exp2)
+  command 'dll' from deb brickos (0.9.0.dfsg-12.2)
+次を試してみてください: sudo apt install <deb name>
+```
+
+・標準出力と標準エラー出力をファイルに出力する
+```
+[(￣∀￣)lll > output.txt 2>&1
+
+/tmp/work
+[(￣∀￣)V]# cat output.txt
+コマンド 'lll' が見つかりません。もしかして:
+  command 'llc' from deb llvm (1:14.0-55~exp2)
+  command 'lli' from deb llvm-runtime (1:14.0-55~exp2)
+  command 'llt' from deb storebackup (3.2.1-2)
+  command 'dll' from deb brickos (0.9.0.dfsg-12.2)
+  command 'lld' from deb lld (1:14.0-55~exp2)
+次を試してみてください: sudo apt install <deb name>
+
+/tmp/work
+[(￣∀￣)ls > output.txt 2>&1
+
+/tmp/work
+[(￣∀￣)V]# cat output.txt
+output.txt
+```
+
 ### Brace Expansion
 
 ```
