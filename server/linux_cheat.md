@@ -382,3 +382,8 @@ ls | egrep -v .conf | paste -s | xargs rm -i
 ```
 grep "文字列" `find ./ -type f`
 ```
+
+## 参考
+
+
+[俺的備忘録 〜なんかいろいろ〜](https://orebibou.com/ja/documents/shellgei/)
