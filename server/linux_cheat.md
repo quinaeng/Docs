@@ -262,6 +262,10 @@ whileの条件式を括弧「()」で書く場合とブラケット「[]」で�
 
 ### grep
 
+### pushd
+
+### popd
+
 ```
 # sample.txtの中で、catコマンドの出力に含まれる文字列を表示
 grep -f <(cat pattern.txt) sample.txt
