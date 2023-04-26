@@ -306,6 +306,12 @@ whileの条件式を括弧「()」で書く場合とブラケット「[]」で�
 
 ### sed
 
+・3行目から5行目を表示する
+
+```
+sed -n '3,5p' file.txt
+```
+
 ### sort
 
 ### grep
@@ -355,6 +361,15 @@ EOF
 
 ### unset
 
+
+### tac
+
+・ファイルを逆順に表示する。(catコマンドの逆)
+
+```
+tac file.txt
+```
+
 ### メモ
 
 ・実現したい機能
@@ -368,6 +383,7 @@ historyコマンドの番号を指定してコマンドを実行する(!123で12
 起動時の自動実行(rc-local)
 /etc/environment
 /etc/skel
+特定のディレクトリ内のファイル名の後ろに_yyyymmddをつける(rename)
 ```
 ## OneLiner
 
@@ -381,6 +397,7 @@ ls | egrep -v .conf | paste -s | xargs rm -i
 
 ```
 grep "文字列" `find ./ -type f`
+(grep -r "文字列" .)
 ```
 
 ## 参考
