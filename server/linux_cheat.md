@@ -387,3 +387,5 @@ grep "文字列" `find ./ -type f`
 
 
 [俺的備忘録 〜なんかいろいろ〜](https://orebibou.com/ja/documents/shellgei/)
+
+[https://twitter.com/minyoruminyon](https://twitter.com/minyoruminyon)
