@@ -400,6 +400,12 @@ grep "文字列" `find ./ -type f`
 (grep -r "文字列" .)
 ```
 
+・カレントディレクトリ配下のファイルを移動する
+
+```
+find . -type f -print0 | xargs -0 mv -t /mnt/backup
+```
+
 ## 参考
 
 
