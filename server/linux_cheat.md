@@ -304,6 +304,42 @@ whileの条件式を括弧「()」で書く場合とブラケット「[]」で�
 
 ### awk
 
+・3行目から5行目を表示する
+
+```
+awk 'NR==3,NR==5' file.txt
+```
+
+・偶数行のみ表示する
+
+```
+awk 'NR%2==0' file.txt
+```
+
+・カンマ区切りで1つ目の値を取得する
+
+```
+awk -F',' '{print $1}' file.txt
+```
+
+・カンマ区切りでフィールドが何個あるかを表示する
+3が表示される
+```
+echo "a,b,c" | awk -F',' '{print NF}'
+```
+
+・すべてを初期化する。※すべて「Hello World」で表示される。
+
+```
+awk 'BEGIN {print "Hello World"}' file.txt
+```
+
+・処理した行番号を表示する
+
+```
+awk 'END {print NR}' file.txt
+```
+
 ### sed
 
 ・3行目から5行目を表示する
