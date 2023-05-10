@@ -205,6 +205,20 @@ else
 fi
 ```
 
+・入力された値が数字かどうかを判定する
+
+```
+#!/bin/bash
+
+read -p "Enter a value: " input
+
+if [[ $input =~ ^[0-9]+$ ]]; then
+    echo "Input is a number."
+else
+    echo "Input is not a number."
+fi
+```
+
 ### for
 
 ・配列の要素を一つずつ表示する。
@@ -289,6 +303,27 @@ whileの条件式を括弧「()」で書く場合とブラケット「[]」で�
 
 
 ### case
+
+```
+#!/bin/bash
+
+read -p "Enter a fruit name: " fruit
+
+case $fruit in
+    "apple")
+        echo "Selected fruit: Apple"
+        ;;
+    "banana")
+        echo "Selected fruit: Banana"
+        ;;
+    "orange")
+        echo "Selected fruit: Orange"
+        ;;
+    *)
+        echo "Unknown fruit"
+        ;;
+esac
+```
 
 ### goto(ラベルに飛ばすやつ)
 
