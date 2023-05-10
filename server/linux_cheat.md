@@ -394,13 +394,23 @@ awk -F',' '{print ($2 == "OK" ? $1 : "")}' foo.txt
 
 ### sed
 
+デリミタは/、|、#が使われることが多い。
+
 ・3行目から5行目を表示する
 
 ```
 sed -n '3,5p' file.txt
 ```
 
+・testをtest2に文字列置換する
+
+```
+sed -i 's/test/test2/g' file.txt
+```
+
 ### sort
+
+
 
 ### grep
 
@@ -492,6 +502,18 @@ grep "文字列" `find ./ -type f`
 
 ```
 find . -type f -print0 | xargs -0 mv -t /mnt/backup
+```
+
+・差分比較
+
+```
+diff -y <(LC_COLLATE=C sort file1.txt) <(LC_COLLATE=C sort file2.txt)
+```
+
+・重複文字列とその数を表示する
+
+```
+cat file.txt | sort | uniq -c | awk '{ print $2, $1 }'
 ```
 
 ## 参考
