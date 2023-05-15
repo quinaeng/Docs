@@ -339,6 +339,12 @@ esac
 
 ### awk
 
+・書式
+
+```
+awk 'pattern { action }' filename
+```
+
 ・オプション
 
 ```
@@ -391,6 +397,29 @@ awk 'END {print NR}' file.txt
 awk -F',' '{print ($2 == "OK" ? $1 : "")}' foo.txt
 ```
 
+・"hello"という文字列を含む行を抽出(文字列パターン)
+
+```
+awk '/hello/ { print }' file.txt
+```
+
+・行の先頭が"a"で始まる行を抽出(正規表現)
+
+```
+awk '/^a/ { print }' file.txt
+```
+
+・"hello"という文字列と"world"という文字列の両方を含む行を抽出(論理演算子)
+
+```
+awk '/hello/ && /world/ { print }' file.txt
+```
+
+・"start"から"end"という文字列が現れた行までの間の行を抽出(パターン範囲)
+
+```
+awk '/start/,/end/ { print }' file.txt
+```
 
 ### sed
 
