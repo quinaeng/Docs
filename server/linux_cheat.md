@@ -657,6 +657,12 @@ cat file.txt | sort | uniq -c | awk '{ print $2, $1 }'
 ls 1 | sed -r "s/(.*)\.jpg$/mv & \1.jpeg/" | bash
 ```
 
+・インターフェース名とIPアドレスを取得する
+
+```
+ip addr | awk '/^[0-9]+:/ { interface=$2 } /inet / { print interface, $2 }'
+```
+
 ## 参考
 
 
