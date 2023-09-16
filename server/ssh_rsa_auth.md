@@ -38,6 +38,8 @@ Enter same passphrase again:<エンターを入力>
 
 ```
 PasswordAuthentication no
+AuthorizedKeysFile      .ssh/authorized_keys
+```
 
 ・サービス再起動
 ```
