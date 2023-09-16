@@ -14,7 +14,7 @@ Enter same passphrase again:<エンターを入力>
 
 ・公開鍵をSSHサーバに転送
 ```
-# ssh-copy-id -i ~/.ssh/id_rsa.pub user@192.168.10.22
+# ssh-copy-id -i ~/.ssh/id_rsa.pub user@192.168.10.100
 ```
 
 - サーバでの作業
@@ -45,4 +45,11 @@ AuthorizedKeysFile      .ssh/authorized_keys
 ```
 # systemctl restart sshd
 # systemctl status sshd
+```
+
+# 動作確認
+
+・SSHクライアントでパスワードなしでSSHログインできることを確認
+```
+# ssh -i ~/.ssh/id_rsa user@192.168.10.100
 ```
