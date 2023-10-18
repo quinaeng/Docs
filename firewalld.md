@@ -1,5 +1,47 @@
 # firewalld
 
+## 基本設定
+
+ゾーン一覧
+```
+# firewall-cmd --get-zones
+```
+
+・特定のゾーンの内容確認
+```
+# firewall-cmd --zone=public --list-all
+```
+
+・ゾーンにサービスを追加する
+```
+# firewall-cmd --zone=public --add-service=http
+```
+
+・ゾーンのサービスを削除する
+```
+# firewall-cmd --zone=public --remove-service=http
+```
+
+・ゾーンにポートを追加する
+```
+# firewall-cmd --zone=public --add-port=8080/tcp
+```
+
+・ゾーンのポートを削除する
+```
+# firewall-cmd --zone=public --remove-port=8080/tcp
+```
+
+・インターフェースを特定のゾーンに属する
+```
+# firewall-cmd --zone=public --add-interface=eth0
+```
+
+・インターフェースを特定のゾーンから外す
+```
+# firewall-cmd --zone=public --remove-interface=eth0
+```
+
 ## SNAT(1対1)の設定
 
 ・IPマスカレードが有効かどうか確認する。
