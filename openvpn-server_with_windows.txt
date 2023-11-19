@@ -1,0 +1,68 @@
+# OpenVPNサーバ(Linux)
+hostnamectl set-hostname openvpn-server
+systemctl disable --now firewalld
+timedatectl set-timezone Asia/Tokyo
+vi /etc/selinux/config
+→disabledにする
+dnf install -y update
+echo "net.ipv4.ip_forward=1" >> /etc/sysctl.config
+sysctl -p
+
+dnf install -y epel-release
+dnf install -y openvpn
+cd /usr/share/easy-rsa/3.0.8/
+./easyrsa init-pki
+./easyrsa build-ca openvpn-server
+→パスワードを求められるので「password」と入力
+./easyrsa build-server-full openvpn-server nopass
+→パスワードを求められるので「password」と入力
+cp pki/ca.crt /etc/openvpn/server/
+cp pki/issued/openvpn-server.crt /etc/openvpn/server
+cp pki/private/openvpn-server.key /etc/openvpn/server
+
+cd /etc/openvpn/server/
+vi server.config
+---
+proto udp
+dev tun 
+port 1194 
+ifconfig 10.8.0.1 10.8.0.2
+; server 10.0.0.0 255.255.255.0
+secret static.key
+comp-lzo
+keepalive 10 60
+ping-timer-rem
+persist-tun
+persist-key
+cipher AES-256-CBC
+auth SHA256
+---
+
+openvpn--genkey --secret {VPNクライアント名}.key
+cat {VPNクライアント名}.key
+→内容をメモ帳に控える
+
+curl ifconfig.me
+→表示されたグローバルIPをメモ帳に控える
+
+# Windowsの設定
+・エクスプローラーで下記フォルダを開く
+C:\User/{ユーザ名}\OpenVPN/config/statickey_client\
+
+{VPNクライアント名}.keyを作成する
+statickey_client.ovpnを作成し下記をコピペする
+---
+remote {OpenVPNサーバのパブリックIPアドレス}
+proto udp
+dev tun
+port 1194
+ifconfig 10.8.0.2 10.8.0.1
+secret static.key
+comp-lzo
+keepalive 10 60
+ping-timer-rem
+persist-tun
+persist-key
+cipher AES-256-CBC
+auth SHA256
+---
