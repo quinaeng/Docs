@@ -1,0 +1,345 @@
+# ファイルサーバ構築
+
+## 設計
+
+- ミドルウェア
+  - vsftpd
+  - samba
+  - rsyslog
+  - autofs
+  - cron
+  - chronyd
+  - acronis
+  
+- パスワードポリシー
+  - 8文字以上
+  - 英字、数字、記号の3種類を組み合わせたパスワード
+  - 英字の大文字と小文字を区別する
+  - パスワードの有効期限は90日(90日以上はアカウントがロックされる)
+  - パスワードの有効期限の10日前に通知される
+
+## 構築
+
+- 権限昇格
+```
+su root
+```
+
+- ホスト名
+```
+hostnamectl set-hostname smzlog01
+```
+
+- 事前の登録されているかどうかを確認する
+```
+subscription-manager identity
+```
+
+```
+[root@smzlog01 kamizato]# subscription-manager identity
+システム ID: cc61e01c-0644-4c9f-93eb-585da5b58b13
+名前: localhost.localdomain
+組織名: 15132717
+組織 ID: 15132717
+[root@smzlog01 kamizato]# 
+```
+
+- RHELライセンス認証
+```
+subscription-manager register
+```
+
+```
+[root@localhost kamizato]# subscription-manager register
+登録中: subscription.rhsm.redhat.com:443/subscription
+ユーザー名: quinaeng@gmail.com
+パスワード: 
+このシステムは、次の ID で登録されました: cc61e01c-0644-4c9f-93eb-585da5b58b13
+登録したシステム名: localhost.localdomain
+[root@localhost kamizato]# 
+```
+
+- 手動時刻同期(これをしないとdnfが使えない可能性がある)
+```
+chronyc makestep
+```
+
+- セキュリティアップデート
+```
+dnf updateinfo info security
+```
+
+```
+dnf update --exclude=kernel* -y
+```
+
+- suコマンドをwheelグループに属しているユーザのみに制限
+```
+vi /etc/pam.d/su
+```
+
+```
+auth		required        pam_wheel.so use_uid
+```
+
+- sudoコマンドをwheelグループに制限する(/etc/sudoers)
+```
+visudo
+```
+
+```
+%wheel ALL=(ALL) ALL
+```
+
+- パスワードポリシーの設定
+```
+vi /etc/security/pwquality.conf
+```
+
+```
+# 最低文字数
+minlen = 8
+
+# 英字（大文字 or 小文字）を最低1文字
+minclass = 3
+
+# 個別指定（必要に応じて）
+# minlower = 1
+# minupper = 1
+# mindigit = 1
+# minspecial = 1
+```
+
+- デフォルトのパスワード有効期限を設定
+```
+vi /etc/login.defs
+```
+
+```
+PASS_MAX_DAYS 90 #パスワード有効期限
+PASS_MIN_DAYS 0  #パスワード変更の最低間隔
+PASS_WARN_AGE 10 #有効期限切れの警告の通知(10日前)
+SU_WHEEL_ONLY yes #新規ユーザをWHEELグループのみに属する
+```
+
+- bashrcの設定ファイルのバックアップ 修正
+```
+cp -ip /etc/bashrc /etc/bashrc.org
+```
+
+- bashrcの設定
+```
+vi /etc/bashrc
+```
+
+```
+export HISTFILE=/var/log/bash_history/.bash_history_$USER
+export HISTTIMEFORMAT='%y/%m/%d %H:%M:%S '
+umask 022
+```
+
+- profileのバックアップ
+```
+cp -ip /etc/profile /etc/profile.org
+```
+
+- profileの設定
+```
+vi /etc/profile
+```
+
+```
+umask 022
+```
+
+
+- snmpdのインストール
+```
+dnf install -y net-snmp net-snmp-utils
+```
+
+- snmpdの設定ファイルのバックアップ
+```
+cp -ip /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.org
+```
+
+```
+vi cp -ip /etc/snmp/snmpd.conf
+```
+
+```
+
+```
+
+- snmpdの起動と自動起動設定
+```
+systemctl enable --now snmpd
+```
+
+
+- autofsのインストール
+```
+dnf install -y autofs
+```
+
+```
+
+```
+
+
+
+- sambaのインストール
+```
+sudo dnf install -y samba
+```
+
+- 共有ディレクトリの作成
+```
+mkdir -p /data/data
+```
+
+- 設定ファイルのバックアップ
+```
+cp -ip /etc/samba/smb.conf /etc/samba/smb.conf.org
+```
+
+- 設定変更
+```
+vi /etc/samba/smb.conf
+```
+
+```
+[data]
+
+```
+
+
+- firewalldの停止と自動起動無効化
+```
+systemctl disable --now firewalld
+```
+
+
+- vsftpdのインストール
+```
+dnf install -y vsftpd
+```
+
+- 設定ファイルのバックアップ
+```
+cp -ip /etc/vsftpd/vsftpd.conf /etc/vsftpd/vsftpd.conf.org
+```
+
+```
+vi /etc/vsftpd/vsftpd.conf
+```
+
+
+編集
+
+
+
+
+
+
+
+
+
+## 運用手順
+
+### アカウント関連
+
+- ユーザのパスワード有効期限を確認
+```
+chage -l <user>
+```
+
+```
+root@smzlog01 kamizato]# chage -l sds
+最終パスワード変更日				: 8月 24, 2025
+パスワード期限:					: 11月 22, 2025
+パスワード無効化中					: なし
+アカウント期限切れ						: なし
+パスワードが変更できるまでの最短日数		: 0
+パスワードを変更しなくてよい最長日数		: 90
+パスワード期限が切れる前に警告される日数		: 10
+```
+
+- パスワード期限が切れる前の警告(パスワード変更を強制的に求められる)
+```
+amizato $ ssh sds@192.168.10.229
+sds@192.168.10.229's password: 
+You are required to change your password immediately (password expired).
+You are required to change your password immediately (password expired).
+Register this system with Red Hat Insights: rhc connect
+
+Example:
+# rhc connect --activation-key <key> --organization <org>
+
+The rhc client and Red Hat Insights will enable analytics and additional
+management capabilities on your system.
+View your connected systems at https://console.redhat.com/insights
+
+You can learn more about how to register your system 
+using rhc at https://red.ht/registration
+Last login: Sun Aug 24 14:07:24 2025 from 192.168.10.213
+WARNING: Your password has expired.
+You must change your password now and login again!
+ユーザー sds のパスワードを変更。
+Current password: 
+```
+
+
+- アカウントの即時ロック
+```
+passwd -l <user>
+```
+
+```
+[root@smzlog01 kamizato]#  passwd -l sds
+ユーザー sds 用のパスワードをロック。
+passwd: 成功
+```
+
+- アカウントのロック解除
+```
+passwd -u <user>
+```
+
+```
+[root@smzlog01 kamizato]#  passwd -u sds
+ユーザー sds 用のパスワードをロック解除。
+passwd: 成功
+```
+
+- ロックされたアカウントの確認
+```
+passwd -S <user>
+```
+
+- パスワードロック時
+```
+[root@smzlog01 kamizato]#  passwd -S sds
+sds LK 2025-02-01 0 90 10 -1 (パスワードはロック済み。)
+[root@smzlog01 kamizato]# 
+```
+
+- 正常時
+```
+[root@smzlog01 kamizato]#  passwd -S sds
+sds PS 2025-02-01 0 90 10 -1 (パスワード設定済み、SHA512 暗号化。)
+```
+
+- Smabaアカウントの作成
+```
+smbpasswd -a <user>
+```
+
+- Sambaアカウントの一覧を確認
+```
+dbedit -Lv
+```
+
+
+## その他(ナレッジ)
+
