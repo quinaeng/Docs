@@ -1,74 +1,591 @@
-# README
+[root@smzlog01 sds]# cat /etc/security/pwquality.conf
+# Configuration for systemwide password quality limits
+# Defaults:
+#
+# Number of characters in the new password that must not be present in the
+# old password.
+# difok = 1
+#
+# Minimum acceptable size for the new password (plus one if
+# credits are not disabled which is the default). (See pam_cracklib manual.)
+# Cannot be set to lower value than 6.
+minlen = 8
+#
+# The maximum credit for having digits in the new password. If less than 0
+# it is the minimum number of digits in the new password.
+# dcredit = 0
+#
+# The maximum credit for having uppercase characters in the new password.
+# If less than 0 it is the minimum number of uppercase characters in the new
+# password.
+# ucredit = 0
+#
+# The maximum credit for having lowercase characters in the new password.
+# If less than 0 it is the minimum number of lowercase characters in the new
+# password.
+# lcredit = 0
+#
+# The maximum credit for having other characters in the new password.
+# If less than 0 it is the minimum number of other characters in the new
+# password.
+# ocredit = 0
+#
+# The minimum number of required classes of characters for the new
+# password (digits, uppercase, lowercase, others).
+minclass = 4
+#
+# The maximum number of allowed consecutive same characters in the new password.
+# The check is disabled if the value is 0.
+# maxrepeat = 0
+#
+# The maximum number of allowed consecutive characters of the same class in the
+# new password.
+# The check is disabled if the value is 0.
+# maxclassrepeat = 0
+#
+# Whether to check for the words from the passwd entry GECOS string of the user.
+# The check is enabled if the value is not 0.
+# gecoscheck = 0
+#
+# Whether to check for the words from the cracklib dictionary.
+# The check is enabled if the value is not 0.
+# dictcheck = 1
+#
+# Whether to check if it contains the user name in some form.
+# The check is enabled if the value is not 0.
+# usercheck = 1
+#
+# Length of substrings from the username to check for in the password
+# The check is enabled if the value is greater than 0 and usercheck is enabled.
+# usersubstr = 0
+#
+# Whether the check is enforced by the PAM module and possibly other
+# applications.
+# The new password is rejected if it fails the check and the value is not 0.
+# enforcing = 1
+#
+# Path to the cracklib dictionaries. Default is to use the cracklib default.
+# dictpath =
+#
+# Prompt user at most N times before returning with error. The default is 1.
+# retry = 3
+#
+# Enforces pwquality checks on the root user password.
+# Enabled if the option is present.
+# enforce_for_root
+#
+# Skip testing the password quality for users that are not present in the
+# /etc/passwd file.
+# Enabled if the option is present.
+# local_users_only
+minclass = 4
+minlower = 1
+minupper = 1
+mindigit = 1
+minspecial = 1
+[root@smzlog01 sds]#
+[root@smzlog01 sds]# cat /etc/security/faillock.conf
+# Configuration for locking the user after multiple failed
+# authentication attempts.
+#
+# The directory where the user files with the failure records are kept.
+# The default is /var/run/faillock.
+# dir = /var/run/faillock
+#
+# Will log the user name into the system log if the user is not found.
+# Enabled if option is present.
+# audit
+#
+# Don't print informative messages.
+# Enabled if option is present.
+# silent
+#
+# Don't log informative messages via syslog.
+# Enabled if option is present.
+# no_log_info
+#
+# Only track failed user authentications attempts for local users
+# in /etc/passwd and ignore centralized (AD, IdM, LDAP, etc.) users.
+# The `faillock` command will also no longer track user failed
+# authentication attempts. Enabling this option will prevent a
+# double-lockout scenario where a user is locked out locally and
+# in the centralized mechanism.
+# Enabled if option is present.
+# local_users_only
+#
+# Deny access if the number of consecutive authentication failures
+# for this user during the recent interval exceeds n tries.
+# The default is 3.
+deny = 5
+#
+# The length of the interval during which the consecutive
+# authentication failures must happen for the user account
+# lock out is <replaceable>n</replaceable> seconds.
+# The default is 900 (15 minutes).
+fail_interval = 900
+#
+# The access will be re-enabled after n seconds after the lock out.
+# The value 0 has the same meaning as value `never` - the access
+# will not be re-enabled without resetting the faillock
+# entries by the `faillock` command.
+# The default is 600 (10 minutes).
+unlock_time = 1600
+#
+# Root account can become locked as well as regular accounts.
+# Enabled if option is present.
+# even_deny_root
+#
+# This option implies the `even_deny_root` option.
+# Allow access after n seconds to root account after the
+# account is locked. In case the option is not specified
+# the value is the same as of the `unlock_time` option.
+# root_unlock_time = 900
+#
+# If a group name is specified with this option, members
+# of the group will be handled by this module the same as
+# the root account (the options `even_deny_root>` and
+# `root_unlock_time` will apply to them.
+# By default, the option is not set.
+# admin_group = <admin_group_name>
+[root@smzlog01 sds]#
+[root@smzlog01 sds]# cat /etc/pam.d/system-auth
+#%PAM-1.0
+# This file is auto-generated.
+# User changes will be destroyed the next time authselect is run.
+auth        required      pam_env.so
+auth        sufficient    pam_unix.so try_first_pass nullok
+auth        required      pam_deny.so
 
-メモを置くリポジトリです。
+account     required      pam_unix.so
 
-## INFO
+password    requisite     pam_pwquality.so try_first_pass local_users_only retry=3 authtok_type=
+password    sufficient    pam_unix.so try_first_pass use_authtok nullok sha512 shadow remember=5
+password    required      pam_deny.so
 
-```
-# cat /etc/redhat-release
-CentOS Linux release 8.4.2105
-```
+session     optional      pam_keyinit.so revoke
+session     required      pam_limits.so
+-session     optional      pam_systemd.so
+session     [success=1 default=ignore] pam_succeed_if.so service in crond quiet use_uid
+session     required      pam_unix.so
+[root@smzlog01 sds]#
+[root@smzlog01 sds]# cat /etc/pam.d/su
+#%PAM-1.0
+auth            required        pam_env.so
+auth            sufficient      pam_rootok.so
+# Uncomment the following line to implicitly trust users in the "wheel" group.
+#auth           sufficient      pam_wheel.so trust use_uid
+# Uncomment the following line to require a user to be in the "wheel" group.
+auth            required        pam_wheel.so use_uid
+auth            substack        system-auth
+auth            include         postlogin
+account         sufficient      pam_succeed_if.so uid = 0 use_uid quiet
+account         include         system-auth
+password        include         system-auth
+session         include         system-auth
+session         include         postlogin
+session         optional        pam_xauth.so
+[root@smzlog01 sds]# cat /etc/login.defs
+#
+# Please note that the parameters in this configuration file control the
+# behavior of the tools from the shadow-utils component. None of these
+# tools uses the PAM mechanism, and the utilities that use PAM (such as the
+# passwd command) should therefore be configured elsewhere. Refer to
+# /etc/pam.d/system-auth for more information.
+#
 
-```
-# uname -a
-4.18.0-305.19.1.el8_4.x86_64 #1 SMP Wed Sep 15 15:39:39 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
-```
+#
+# Delay in seconds before being allowed another attempt after a login failure
+# Note: When PAM is used, some modules may enforce a minimum delay (e.g.
+#       pam_unix(8) enforces a 2s delay)
+#
+#FAIL_DELAY             3
 
-```
-[root@localhost system-connections]# cat bond0.nmconnection
-[connection]
-id=bond0
-uuid=bc678a7a-d6f0-47fe-b536-c35565f67087
-type=bond
-interface-name=bond0
-timestamp=1758865359
+# Currently FAILLOG_ENAB is not supported
 
-[bond]
-downdelay=0
-fail_over_mac=0
-miimon=100
-mode=active-backup
-primary=ens192
-updelay=0
+#
+# Enable display of unknown usernames when login(1) failures are recorded.
+#
+#LOG_UNKFAIL_ENAB       no
 
-[ipv4]
-address1=192.168.10.231/24
-gateway=10.106.254.206
-method=manual
+# Currently LOG_OK_LOGINS is not supported
 
-[ipv6]
-addr-gen-mode=default
-method=auto
+# Currently LASTLOG_ENAB is not supported
 
-[proxy]
-[root@localhost system-connections]# cat ens192.nmconnection
-[connection]
-id=ens192
-uuid=d438b261-7e7d-4b4d-b090-f3de04075fb1
-type=ethernet
-controller=bond0
-interface-name=ens192
-port-type=bond
-timestamp=1758866249
+#
+# Limit the highest user ID number for which the lastlog entries should
+# be updated.
+#
+# No LASTLOG_UID_MAX means that there is no user ID limit for writing
+# lastlog entries.
+#
+#LASTLOG_UID_MAX
 
-[ethernet]
-duplex=full
-speed=100
+# Currently MAIL_CHECK_ENAB is not supported
 
-[bond-port]
-[root@localhost system-connections]# cat ens224.nmconnection
-[connection]
-id=ens224
-uuid=62ed95c2-3858-4d9f-985c-581145d3ff79
-type=ethernet
-controller=bond0
-interface-name=ens224
-port-type=bond
-timestamp=1758866249
+# Currently OBSCURE_CHECKS_ENAB is not supported
 
-[ethernet]
-duplex=full
-speed=100
+# Currently PORTTIME_CHECKS_ENAB is not supported
 
-[bond-port]
-```
+# Currently QUOTAS_ENAB is not supported
+
+# Currently SYSLOG_SU_ENAB is not supported
+
+#
+# Enable "syslog" logging of newgrp(1) and sg(1) activity.
+#
+#SYSLOG_SG_ENAB         yes
+
+# Currently CONSOLE is not supported
+
+# Currently SULOG_FILE is not supported
+
+# Currently MOTD_FILE is not supported
+
+# Currently ISSUE_FILE is not supported
+
+# Currently TTYTYPE_FILE is not supported
+
+# Currently FTMP_FILE is not supported
+
+# Currently NOLOGINS_FILE is not supported
+
+# Currently SU_NAME is not supported
+
+# *REQUIRED*
+#   Directory where mailboxes reside, _or_ name of file, relative to the
+#   home directory.  If you _do_ define both, MAIL_DIR takes precedence.
+#
+MAIL_DIR        /var/spool/mail
+#MAIL_FILE      .mail
+
+#
+# If defined, file which inhibits all the usual chatter during the login
+# sequence.  If a full pathname, then hushed mode will be enabled if the
+# user's name or shell are found in the file.  If not a full pathname, then
+# hushed mode will be enabled if the file exists in the user's home directory.
+#
+#HUSHLOGIN_FILE .hushlogin
+#HUSHLOGIN_FILE /etc/hushlogins
+
+# Currently ENV_TZ is not supported
+
+# Currently ENV_HZ is not supported
+
+#
+# The default PATH settings, for superuser and normal users.
+#
+# (they are minimal, add the rest in the shell startup files)
+#ENV_SUPATH     PATH=/sbin:/bin:/usr/sbin:/usr/bin
+#ENV_PATH       PATH=/bin:/usr/bin
+
+#
+# Terminal permissions
+#
+#       TTYGROUP        Login tty will be assigned this group ownership.
+#       TTYPERM         Login tty will be set to this permission.
+#
+# If you have a write(1) program which is "setgid" to a special group
+# which owns the terminals, define TTYGROUP as the number of such group
+# and TTYPERM as 0620.  Otherwise leave TTYGROUP commented out and
+# set TTYPERM to either 622 or 600.
+#
+#TTYGROUP       tty
+#TTYPERM                0600
+
+# Currently ERASECHAR, KILLCHAR and ULIMIT are not supported
+
+# Default initial "umask" value used by login(1) on non-PAM enabled systems.
+# Default "umask" value for pam_umask(8) on PAM enabled systems.
+# UMASK is also used by useradd(8) and newusers(8) to set the mode for new
+# home directories if HOME_MODE is not set.
+# 022 is the default value, but 027, or even 077, could be considered
+# for increased privacy. There is no One True Answer here: each sysadmin
+# must make up their mind.
+UMASK           022
+
+# HOME_MODE is used by useradd(8) and newusers(8) to set the mode for new
+# home directories.
+# If HOME_MODE is not set, the value of UMASK is used to create the mode.
+HOME_MODE       0700
+
+# Password aging controls:
+#
+#       PASS_MAX_DAYS   Maximum number of days a password may be used.
+#       PASS_MIN_DAYS   Minimum number of days allowed between password changes.
+#       PASS_MIN_LEN    Minimum acceptable password length.
+#       PASS_WARN_AGE   Number of days warning given before a password expires.
+#
+PASS_MAX_DAYS   90
+PASS_MIN_DAYS   0
+PASS_WARN_AGE   10
+SU_WHEEL_ONLY   yes
+
+# Currently PASS_MIN_LEN is not supported
+
+# Currently SU_WHEEL_ONLY is not supported
+
+# Currently CRACKLIB_DICTPATH is not supported
+
+#
+# Min/max values for automatic uid selection in useradd(8)
+#
+UID_MIN                  1000
+UID_MAX                 60000
+# System accounts
+SYS_UID_MIN               201
+SYS_UID_MAX               999
+# Extra per user uids
+SUB_UID_MIN                100000
+SUB_UID_MAX             600100000
+SUB_UID_COUNT               65536
+
+#
+# Min/max values for automatic gid selection in groupadd(8)
+#
+GID_MIN                  1000
+GID_MAX                 60000
+# System accounts
+SYS_GID_MIN               201
+SYS_GID_MAX               999
+# Extra per user group ids
+SUB_GID_MIN                100000
+SUB_GID_MAX             600100000
+SUB_GID_COUNT               65536
+
+#
+# Max number of login(1) retries if password is bad
+#
+#LOGIN_RETRIES          3
+
+#
+# Max time in seconds for login(1)
+#
+#LOGIN_TIMEOUT          60
+
+# Currently PASS_CHANGE_TRIES is not supported
+
+# Currently PASS_ALWAYS_WARN is not supported
+
+# Currently PASS_MAX_LEN is not supported
+
+# Currently CHFN_AUTH is not supported
+
+#
+# Which fields may be changed by regular users using chfn(1) - use
+# any combination of letters "frwh" (full name, room number, work
+# phone, home phone).  If not defined, no changes are allowed.
+# For backward compatibility, "yes" = "rwh" and "no" = "frwh".
+#
+#CHFN_RESTRICT          rwh
+
+# Currently LOGIN_STRING is not supported
+
+# Currently MD5_CRYPT_ENAB is not supported
+
+#
+# If set to MD5, MD5-based algorithm will be used for encrypting password
+# If set to SHA256, SHA256-based algorithm will be used for encrypting password
+# If set to SHA512, SHA512-based algorithm will be used for encrypting password
+# If set to BLOWFISH, BLOWFISH-based algorithm will be used for encrypting password
+# If set to DES, DES-based algorithm will be used for encrypting password (default)
+#
+ENCRYPT_METHOD SHA512
+
+#
+# Only works if ENCRYPT_METHOD is set to SHA256 or SHA512.
+#
+# Define the number of SHA rounds.
+# With a lot of rounds, it is more difficult to brute-force the password.
+# However, more CPU resources will be needed to authenticate users if
+# this value is increased.
+#
+# If not specified, the libc will choose the default number of rounds (5000).
+# The values must be within the 1000-999999999 range.
+#
+SHA_CRYPT_MAX_ROUNDS 100000
+
+# Currently SHA_CRYPT_MIN_ROUNDS is not supported
+
+# Currently BCRYPT_MIN_ROUNDS and BCRYPT_MAX_ROUNDS are not supported
+
+# Currently CONSOLE_GROUPS is not supported
+
+#
+# Should login be allowed if we can't cd to the home directory?
+# Default is yes.
+#
+#DEFAULT_HOME   yes
+
+# Currently ENVIRON_FILE is not supported
+
+#
+# If defined, this command is run when removing a user.
+# It should remove any at/cron/print jobs etc. owned by
+# the user to be removed (passed as the first argument).
+#
+#USERDEL_CMD    /usr/sbin/userdel_local
+
+#
+# Enables userdel(8) to remove user groups if no members exist.
+#
+USERGROUPS_ENAB yes
+
+#
+# If set to a non-zero number, the shadow utilities will make sure that
+# groups never have more than this number of users on one line.
+# This permits to support split groups (groups split into multiple lines,
+# with the same group ID, to avoid limitation of the line length in the
+# group file).
+#
+# 0 is the default value and disables this feature.
+#
+#MAX_MEMBERS_PER_GROUP  0
+
+#
+# If useradd(8) should create home directories for users by default (non
+# system users only).
+# This option is overridden with the -M or -m flags on the useradd(8)
+# command-line.
+#
+CREATE_HOME     yes
+
+#
+# Force use shadow, even if shadow passwd & shadow group files are
+# missing.
+#
+#FORCE_SHADOW    yes
+
+#
+# Select the HMAC cryptography algorithm.
+# Used in pam_timestamp module to calculate the keyed-hash message
+# authentication code.
+#
+# Note: It is recommended to check hmac(3) to see the possible algorithms
+# that are available in your system.
+#
+HMAC_CRYPTO_ALGO SHA512
+[root@smzlog01 sds]#
+[root@smzlog01 sds]# cat /etc/sudoers
+## Sudoers allows particular users to run various commands as
+## the root user, without needing the root password.
+##
+## Examples are provided at the bottom of the file for collections
+## of related commands, which can then be delegated out to particular
+## users or groups.
+##
+## This file must be edited with the 'visudo' command.
+
+## Host Aliases
+## Groups of machines. You may prefer to use hostnames (perhaps using
+## wildcards for entire domains) or IP addresses instead.
+# Host_Alias     FILESERVERS = fs1, fs2
+# Host_Alias     MAILSERVERS = smtp, smtp2
+
+## User Aliases
+## These aren't often necessary, as you can use regular groups
+## (ie, from files, LDAP, NIS, etc) in this file - just use %groupname
+## rather than USERALIAS
+# User_Alias ADMINS = jsmith, mikem
+
+
+## Command Aliases
+## These are groups of related commands...
+
+## Networking
+# Cmnd_Alias NETWORKING = /sbin/route, /sbin/ifconfig, /bin/ping, /sbin/dhclient, /usr/bin/net, /sbin/iptables, /usr/bin/rfcomm, /usr/bin/wvdial, /sbin/iwconfig, /sbin/mii-tool
+
+## Installation and management of software
+# Cmnd_Alias SOFTWARE = /bin/rpm, /usr/bin/up2date, /usr/bin/yum
+
+## Services
+# Cmnd_Alias SERVICES = /sbin/service, /sbin/chkconfig, /usr/bin/systemctl start, /usr/bin/systemctl stop, /usr/bin/systemctl reload, /usr/bin/systemctl restart, /usr/bin/systemctl status, /usr/bin/systemctl enable, /usr/bin/systemctl disable
+
+## Updating the locate database
+# Cmnd_Alias LOCATE = /usr/bin/updatedb
+
+## Storage
+# Cmnd_Alias STORAGE = /sbin/fdisk, /sbin/sfdisk, /sbin/parted, /sbin/partprobe, /bin/mount, /bin/umount
+
+## Delegating permissions
+# Cmnd_Alias DELEGATING = /usr/sbin/visudo, /bin/chown, /bin/chmod, /bin/chgrp
+
+## Processes
+# Cmnd_Alias PROCESSES = /bin/nice, /bin/kill, /usr/bin/kill, /usr/bin/killall
+
+## Drivers
+# Cmnd_Alias DRIVERS = /sbin/modprobe
+
+# Defaults specification
+
+#
+# Refuse to run if unable to disable echo on the tty.
+#
+Defaults   !visiblepw
+
+#
+# Preserving HOME has security implications since many programs
+# use it when searching for configuration files. Note that HOME
+# is already set when the the env_reset option is enabled, so
+# this option is only effective for configurations where either
+# env_reset is disabled or HOME is present in the env_keep list.
+#
+Defaults    always_set_home
+Defaults    match_group_by_gid
+
+# Prior to version 1.8.15, groups listed in sudoers that were not
+# found in the system group database were passed to the group
+# plugin, if any. Starting with 1.8.15, only groups of the form
+# %:group are resolved via the group plugin by default.
+# We enable always_query_group_plugin to restore old behavior.
+# Disable this option for new behavior.
+Defaults    always_query_group_plugin
+
+Defaults    env_reset
+Defaults    env_keep =  "COLORS DISPLAY HOSTNAME HISTSIZE KDEDIR LS_COLORS"
+Defaults    env_keep += "MAIL PS1 PS2 QTDIR USERNAME LANG LC_ADDRESS LC_CTYPE"
+Defaults    env_keep += "LC_COLLATE LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES"
+Defaults    env_keep += "LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER LC_TELEPHONE"
+Defaults    env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSET XAUTHORITY"
+
+#
+# Adding HOME to env_keep may enable a user to run unrestricted
+# commands via sudo.
+#
+# Defaults   env_keep += "HOME"
+
+Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin
+
+## Next comes the main part: which users can run what software on
+## which machines (the sudoers file can be shared between multiple
+## systems).
+## Syntax:
+##
+##      user    MACHINE=COMMANDS
+##
+## The COMMANDS section may have other options added to it.
+##
+## Allow root to run any commands anywhere
+root    ALL=(ALL)       ALL
+
+## Allows members of the 'sys' group to run networking, software,
+## service management apps and more.
+# %sys ALL = NETWORKING, SOFTWARE, SERVICES, STORAGE, DELEGATING, PROCESSES, LOCATE, DRIVERS
+
+## Allows people in group wheel to run all commands
+%wheel  ALL=(ALL)       ALL
+
+## Same thing without a password
+# %wheel        ALL=(ALL)       NOPASSWD: ALL
+
+## Allows members of the users group to mount and unmount the
+## cdrom as root
+# %users  ALL=/sbin/mount /mnt/cdrom, /sbin/umount /mnt/cdrom
+
+## Allows members of the users group to shutdown this system
+# %users  localhost=/sbin/shutdown -h now
+
+## Read drop-in files from /etc/sudoers.d (the # here does not mean a comment)
+#includedir /etc/sudoers.d
+[root@smzlog01 sds]#
+
+
