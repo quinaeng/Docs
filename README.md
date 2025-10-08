@@ -1,3 +1,5 @@
+
+```
 #%PAM-1.0
 auth       substack     password-auth
 auth       include      postlogin
@@ -15,3 +17,4 @@ session    optional     pam_keyinit.so force revoke
 session    optional     pam_motd.so
 session    include      password-auth
 session    include      postlogin
+```
