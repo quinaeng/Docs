@@ -1,109 +1,181 @@
 ```
-[root@smzlog01 pam.d]# cat /etc/pam.d/login
-#%PAM-1.0
-auth       substack     system-auth
-auth       include      postlogin
-account    required     pam_nologin.so
-account    include      system-auth
-password   include      system-auth
-# pam_selinux.so close should be the first session rule
-session    required     pam_selinux.so close
-session    required     pam_loginuid.so
-# pam_selinux.so open should only be followed by sessions to be executed in the user context
-session    required     pam_selinux.so open
-session    required     pam_namespace.so
-session    optional     pam_keyinit.so force revoke
-session    include      system-auth
-session    include      postlogin
--session   optional     pam_ck_connector.so
-[root@smzlog01 pam.d]#
-[root@smzlog01 pam.d]# cat /etc/pam.d/sshd
-#%PAM-1.0
-auth       substack     password-auth
-auth       include      postlogin
-account    required     pam_sepermit.so
-account    required     pam_nologin.so
-account    include      password-auth
-password   include      password-auth
-# pam_selinux.so close should be the first session rule
-session    required     pam_selinux.so close
-session    required     pam_loginuid.so
-# pam_selinux.so open should only be followed by sessions to be executed in the user context
-session    required     pam_selinux.so open env_params
-session    required     pam_namespace.so
-session    optional     pam_keyinit.so force revoke
-session    optional     pam_motd.so
-session    include      password-auth
-session    include      postlogin
-[root@smzlog01 pam.d]#
-[root@smzlog01 pam.d]# cat /etc/pam.d/vsftpd
-#%PAM-1.0
-auth       required     pam_listfile.so item=user sense=deny file=/etc/vsftpd/ftpusers onerr=succeed
-auth       required     pam_shells.so
-auth       include      password-auth
-account    include      password-auth
-session    optional     pam_keyinit.so    force revoke
-session    required     pam_loginuid.so
-session    include      password-auth
-[root@smzlog01 pam.d]#
-[root@smzlog01 pam.d]# cat /etc/pam.d/password-auth
-#%PAM-1.0
-# This file is auto-generated.
-# User changes will be destroyed the next time authselect is run.
-auth        required      pam_env.so
-auth        required      pam_faillock.so preauth
-auth        sufficient    pam_unix.so try_first_pass nullok
-auth        [default=die] pam_faillock.so authfail
-auth        required      pam_deny.so
-
-account     required      pam_unix.so
-
-password    requisite     pam_pwquality.so try_first_pass local_users_only retry=3 authtok_type=
-password    sufficient    pam_unix.so try_first_pass use_authtok nullok sha512 shadow remember=5
-password    required      pam_deny.so
-
-session     optional      pam_keyinit.so revoke
-session     required      pam_limits.so
--session     optional      pam_systemd.so
-session     [success=1 default=ignore] pam_succeed_if.so service in crond quiet use_uid
-session     required      pam_unix.so
-[root@smzlog01 pam.d]#
-[root@smzlog01 pam.d]# cat /etc/pam.d/su
-#%PAM-1.0
-auth            required        pam_env.so
-auth            sufficient      pam_rootok.so
-# Uncomment the following line to implicitly trust users in the "wheel" group.
-#auth           sufficient      pam_wheel.so trust use_uid
-# Uncomment the following line to require a user to be in the "wheel" group.
-#auth           required        pam_wheel.so use_uid
-auth            substack        system-auth
-auth            include         postlogin
-account         sufficient      pam_succeed_if.so uid = 0 use_uid quiet
-account         include         system-auth
-password        include         system-auth
-session         include         system-auth
-session         include         postlogin
-session         optional        pam_xauth.so
-[root@smzlog01 pam.d]#
-[root@smzlog01 pam.d]# cat /etc/pam.d/system-auth
-#%PAM-1.0
-# This file is auto-generated.
-# User changes will be destroyed the next time authselect is run.
-auth        required      pam_env.so
-auth        required      pam_faillock.so preauth
-auth        sufficient    pam_unix.so try_first_pass nullok
-auth        [default=die] pam_faillock.so authfail
-auth        required      pam_deny.so
-
-account     required      pam_unix.so
-
-password    requisite     pam_pwquality.so try_first_pass local_users_only retry=3 authtok_type=
-password    sufficient    pam_unix.so try_first_pass use_authtok nullok sha512 shadow remember=5
-password    required      pam_deny.so
-
-session     optional      pam_keyinit.so revoke
-session     required      pam_limits.so
--session     optional      pam_systemd.so
-session     [success=1 default=ignore] pam_succeed_if.so service in crond quiet use_uid
-session     required      pam_unix.so
+[root@smzlog01 pam.d]# systemctl list-unit-files -t service | cat
+UNIT FILE                                  STATE           PRESET
+auditd.service                             enabled         enabled
+autofs.service                             enabled         disabled
+autovt@.service                            alias           -
+blk-availability.service                   disabled        disabled
+chrony-wait.service                        disabled        disabled
+chronyd-restricted.service                 disabled        disabled
+chronyd.service                            enabled         enabled
+console-getty.service                      disabled        disabled
+container-getty@.service                   static          -
+cpupower.service                           disabled        disabled
+crond.service                              enabled         enabled
+dbus-broker.service                        enabled         enabled
+dbus-org.freedesktop.hostname1.service     alias           -
+dbus-org.freedesktop.locale1.service       alias           -
+dbus-org.freedesktop.login1.service        alias           -
+dbus-org.freedesktop.nm-dispatcher.service alias           -
+dbus-org.freedesktop.timedate1.service     alias           -
+dbus.service                               alias           -
+debug-shell.service                        disabled        disabled
+dm-event.service                           static          -
+dnf-makecache.service                      static          -
+dnf-system-upgrade-cleanup.service         static          -
+dnf-system-upgrade.service                 disabled        disabled
+dracut-cmdline.service                     static          -
+dracut-initqueue.service                   static          -
+dracut-mount.service                       static          -
+dracut-pre-mount.service                   static          -
+dracut-pre-pivot.service                   static          -
+dracut-pre-trigger.service                 static          -
+dracut-pre-udev.service                    static          -
+dracut-shutdown-onfailure.service          static          -
+dracut-shutdown.service                    static          -
+emergency.service                          static          -
+firewalld.service                          disabled        enabled
+fstrim.service                             static          -
+fwupd-offline-update.service               static          -
+fwupd-refresh.service                      static          -
+fwupd.service                              static          -
+getty@.service                             enabled         enabled
+grub-boot-indeterminate.service            static          -
+grub2-systemd-integration.service          static          -
+initrd-cleanup.service                     static          -
+initrd-parse-etc.service                   static          -
+initrd-switch-root.service                 static          -
+initrd-udevadm-cleanup-db.service          static          -
+insights-client-boot.service               enabled         enabled
+insights-client-results.service            static          -
+insights-client.service                    static          -
+irqbalance.service                         enabled         enabled
+kdump.service                              enabled         enabled
+kmod-static-nodes.service                  static          -
+kvm_stat.service                           disabled        disabled
+ldconfig.service                           static          -
+logrotate.service                          static          -
+lvm-devices-import.service                 disabled        disabled
+lvm2-lvmpolld.service                      static          -
+lvm2-monitor.service                       enabled         enabled
+man-db-cache-update.service                static          -
+man-db-restart-cache-update.service        disabled        disabled
+mdadm-grow-continue@.service               static          -
+mdadm-last-resort@.service                 static          -
+mdcheck_continue.service                   static          -
+mdcheck_start.service                      static          -
+mdmon@.service                             static          -
+mdmonitor-oneshot.service                  static          -
+mdmonitor.service                          enabled         enabled
+microcode.service                          enabled         enabled
+modprobe@.service                          static          -
+NetworkManager-dispatcher.service          enabled         enabled
+NetworkManager-wait-online.service         enabled         disabled
+NetworkManager.service                     enabled         enabled
+nftables.service                           disabled        disabled
+nis-domainname.service                     enabled         enabled
+nm-priv-helper.service                     static          -
+pam_namespace.service                      static          -
+polkit.service                             static          -
+quotaon.service                            static          -
+raid-check.service                         static          -
+rc-local.service                           static          -
+rdisc.service                              disabled        disabled
+rescue.service                             static          -
+rhcd.service                               disabled        disabled
+rhsm-facts.service                         disabled        disabled
+rhsm.service                               disabled        disabled
+rhsmcertd.service                          enabled         enabled
+rpmdb-rebuild.service                      disabled        disabled
+rsyslog.service                            enabled         enabled
+selinux-autorelabel-mark.service           enabled         enabled
+selinux-autorelabel.service                static          -
+selinux-check-proper-disable.service       disabled        disabled
+serial-getty@.service                      disabled        disabled
+sshd-keygen@.service                       disabled        disabled
+sshd.service                               enabled         enabled
+sshd@.service                              static          -
+sssd-autofs.service                        indirect        disabled
+sssd-kcm.service                           indirect        disabled
+sssd-nss.service                           indirect        disabled
+sssd-pac.service                           indirect        disabled
+sssd-pam.service                           indirect        disabled
+sssd-ssh.service                           indirect        disabled
+sssd-sudo.service                          indirect        disabled
+sssd.service                               enabled         enabled
+system-update-cleanup.service              static          -
+systemd-ask-password-console.service       static          -
+systemd-ask-password-wall.service          static          -
+systemd-backlight@.service                 static          -
+systemd-binfmt.service                     static          -
+systemd-bless-boot.service                 static          -
+systemd-boot-check-no-failures.service     disabled        disabled
+systemd-boot-random-seed.service           static          -
+systemd-boot-update.service                enabled         enabled
+systemd-coredump@.service                  static          -
+systemd-exit.service                       static          -
+systemd-firstboot.service                  static          -
+systemd-fsck-root.service                  static          -
+systemd-fsck@.service                      static          -
+systemd-growfs-root.service                static          -
+systemd-growfs@.service                    static          -
+systemd-halt.service                       static          -
+systemd-hibernate-resume@.service          static          -
+systemd-hibernate.service                  static          -
+systemd-hostnamed.service                  static          -
+systemd-hwdb-update.service                static          -
+systemd-hybrid-sleep.service               static          -
+systemd-initctl.service                    static          -
+systemd-journal-catalog-update.service     static          -
+systemd-journal-flush.service              static          -
+systemd-journald.service                   static          -
+systemd-journald@.service                  static          -
+systemd-kexec.service                      static          -
+systemd-localed.service                    static          -
+systemd-logind.service                     static          -
+systemd-machine-id-commit.service          static          -
+systemd-modules-load.service               static          -
+systemd-network-generator.service          enabled         enabled
+systemd-pcrfs-root.service                 static          -
+systemd-pcrfs@.service                     static          -
+systemd-pcrmachine.service                 static          -
+systemd-pcrphase-initrd.service            static          -
+systemd-pcrphase-sysinit.service           static          -
+systemd-pcrphase.service                   static          -
+systemd-poweroff.service                   static          -
+systemd-pstore.service                     enabled         enabled
+systemd-quotacheck.service                 static          -
+systemd-random-seed.service                static          -
+systemd-reboot.service                     static          -
+systemd-remount-fs.service                 enabled-runtime disabled
+systemd-repart.service                     static          -
+systemd-rfkill.service                     static          -
+systemd-suspend-then-hibernate.service     static          -
+systemd-suspend.service                    static          -
+systemd-sysctl.service                     static          -
+systemd-sysext.service                     disabled        disabled
+systemd-sysupdate-reboot.service           indirect        disabled
+systemd-sysupdate.service                  indirect        disabled
+systemd-sysusers.service                   static          -
+systemd-timedated.service                  static          -
+systemd-tmpfiles-clean.service             static          -
+systemd-tmpfiles-setup-dev.service         static          -
+systemd-tmpfiles-setup.service             static          -
+systemd-udev-settle.service                static          -
+systemd-udev-trigger.service               static          -
+systemd-udevd.service                      static          -
+systemd-update-done.service                static          -
+systemd-update-utmp-runlevel.service       static          -
+systemd-update-utmp.service                static          -
+systemd-user-sessions.service              static          -
+systemd-vconsole-setup.service             static          -
+systemd-volatile-root.service              static          -
+teamd@.service                             static          -
+udisks2.service                            enabled         enabled
+user-runtime-dir@.service                  static          -
+user@.service                              static          -
+vgauthd.service                            enabled         disabled
+vmtoolsd.service                           enabled         enabled
+vsftpd.service                             enabled         disabled
+vsftpd@.service                            indirect        disabled
 ```
