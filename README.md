@@ -1,3 +1,4 @@
+```
 [sds@smzlog01 ~]$
 [sds@smzlog01 ~]$
 [sds@smzlog01 ~]$ cat /etc/logrotate.d/rsyslog
@@ -17,3 +18,4 @@
 [sds@smzlog01 ~]$
 [sds@smzlog01 ~]$
 [sds@smzlog01 ~]$
+```
