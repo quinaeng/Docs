@@ -32,4 +32,24 @@ grep pwquality /etc/pam.d/system-auth /etc/pam.d/password-auth
 vi /etc/pam.d/passwd
 password include system-auth    ← 追加
 
+
+
+
+
+
+
+
+・未割当領域からディスクパーティションを作成する
+fdisk /dev/sdb
+n
+2
++1T
+w
+
+・物理ディスク作成
+pvcreate /dev/sdb2
+vgcreate vg03 /dev/sdb2
+lvcreate -n lv_data -L 100G vg01
+mkfs.ext4 /dev/vg03/lv_data
+
 ```
