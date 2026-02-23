@@ -5,10 +5,11 @@
 RPO/RTO達成
 
 ## 2. RPO / RTO
-- RPO(Recovery Point Objective):
-  > 記載する
-- RTORecovery Time Objective):
-  > 記載する
+- RPO(Recovery Point Objective)
+  > どの時点までの状態に復旧するのか
+
+- RTO(Recovery Time Objective)
+  > いつまでに復旧するか
 
 ## 3. バックアップ対象
 - データバックアップ
