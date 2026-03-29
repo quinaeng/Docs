@@ -44,6 +44,33 @@ https://snmptt.org/docs/snmptt.shtml#Installation
 
 https://github.com/snmptt/snmptt/releases
 wget <url>
+
+
+・モジュールのインストール(Perl)
+cpan Config::IniFiles
+cpan Net::IP module
+
+vi /etc/snmptt/snmptt.ini
+#snmpttをスタンドアローンではなくデーモンモードで起動する
+mode = daemon
+net_snmp_perl_enable = 1
+net_snmp_perl_best_guess = 2
+
+#日付と時間のフォーマット
+date_time_format = %Y/%m/%d %H:%M:%S
+
+#ZBXが参照するログファイルの場所
+log_file = /var/log/snmptt/snmptt.log
+
+#動作確認のためデバッグモードに設定
+# sleep = 1 #処理間隔（秒）
+# DEBUGGING = 1 #動作確認終了後は0に変更してください。
+# DEBUGGING_FILE = /var/log/snmptt/snmptt.debug
+# DEBUGGING_FILE_HANDLER = /var/log/snmptt/snmptthandler.debug
+
+
+
+https://www.cybertrust.co.jp/blog/linux-oss/system-monitoring/tech-lounge/zbx-tl-001.html
 ```
 
 - ブラウザでアクセスする
